@@ -1,6 +1,6 @@
 #The Case of the Girl in the Red Dress
 -----------------------------------------------------
-She entered like a star, red dress like flames straight outta hell. 
+She entered like a star, dress red like flames straight outta hell. 
 
 I knew she was trouble, but it did me no good. 
 
