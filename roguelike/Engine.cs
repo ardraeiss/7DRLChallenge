@@ -119,7 +119,7 @@ namespace roguelike
                 else if (item == "Gun shot"){
                     Actor light = new Actor(0, 0, '#', "Gun shot", TCODColor.darkYellow);
                     light.blocks = false;
-                    light.pick = new Lightning(10, 10, this);
+                    light.pick = new gunshot(10, 10, this);
 
                     player.contain.inventory.Add(light);
                 }
@@ -127,7 +127,7 @@ namespace roguelike
                 {
                     Actor fire = new Actor(0, 0, '#', "Fire bomb", TCODColor.darkRed);
                     fire.blocks = false;
-                    fire.pick = new Fireball(10, 10, this);
+                    fire.pick = new grenade(10, 10, this);
 
                     player.contain.inventory.Add(fire);
                 }

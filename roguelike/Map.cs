@@ -324,7 +324,7 @@ namespace roguelike
                 else if (actordata.name == "Gun shot"){
                     Actor light = new Actor(actordata.x, actordata.y, '#', "Gun shot", TCODColor.darkYellow);
                     light.blocks = false;
-                    light.pick = new Lightning(10, 10, engine);
+                    light.pick = new gunshot(10, 10, engine);
 
                     engine.actors.Add(light);
                 }
@@ -332,7 +332,7 @@ namespace roguelike
                 {
                     Actor fire = new Actor(actordata.x, actordata.y, '#', "Fire bomb", TCODColor.darkRed);
                     fire.blocks = false;
-                    fire.pick = new Fireball(10, 10, engine);
+                    fire.pick = new grenade(10, 10, engine);
 
                     engine.actors.Add(fire);
                 }
@@ -416,7 +416,7 @@ namespace roguelike
                 int x = TCODRandom.getInstance().getInt(room.x1+1, room.x2-1);
                 int y = TCODRandom.getInstance().getInt(room.y1+1, room.y2-1);
                 
-                if (random < .7)
+                if (random < .01)
                 {
                     Actor healthpot = new Actor(x, y, '!', "Bandage", TCODColor.violet);
                     healthpot.blocks = false;
@@ -424,25 +424,25 @@ namespace roguelike
 
                     engine.actors.Add(healthpot);
                 }
-                else if (random >= .7 && random < .85)
+                else if (random >= .02 && random < .99)
                 {
-                    Actor confuse = new Actor(x, y, '#', "Throw rock", TCODColor.darkBlue);
+                    Actor confuse = new Actor(x, y, '#', "rock", TCODColor.darkBlue);
                     confuse.blocks = false;
                     confuse.pick = new Confuser(10, 10, engine);
 
                     engine.actors.Add(confuse);
                 }
-                else if (random >= .85 && random < .95){
-                    Actor light = new Actor(x, y, '#', "Gun shot", TCODColor.darkYellow);
-                    light.blocks = false;
-                    light.pick = new Lightning(10, 10, engine);
+                else if (random >= .02 && random < .01){
+                    Actor gun = new Actor(x, y, '#', "ammo", TCODColor.darkYellow);
+                    gun.blocks = false;
+                    gun.pick = new gunshot(10, 10, engine);
 
-                    engine.actors.Add(light);
+                    engine.actors.Add(gun);
                 } else
                 {
-                    Actor fire = new Actor(x, y, '#', "Fire bomb", TCODColor.darkRed);
+                    Actor fire = new Actor(x, y, '#', "grenade", TCODColor.darkRed);
                     fire.blocks = false;
-                    fire.pick = new Fireball(10, 10, engine);
+                    fire.pick = new grenade(5, 10, engine);
 
                     engine.actors.Add(fire);
                 }

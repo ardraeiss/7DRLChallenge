@@ -72,7 +72,6 @@ namespace roguelike
         {
             if (wearer.contain != null)
             {
-                System.Diagnostics.Debug.WriteLine("removing {0}...", owner.name);
                 wearer.contain.remove(owner);
                 return true;
             }
@@ -85,6 +84,7 @@ namespace roguelike
         int turnCount = 0;
         float range = 0;
         Engine engine = null;
+        private Pickable pbase = new Pickable();
 
         public Confuser(int turnCount, float range, Engine engine)
         {
@@ -109,7 +109,7 @@ namespace roguelike
             ConfusedMonAI confusedAI = new ConfusedMonAI(turnCount, actor.ai);
             actor.ai = confusedAI;
             engine.gui.message(TCODColor.lightGreen, "{0} looks to be concused and confused", actor.name);
-            return base.use(owner, actor);
+            return pbase.use(owner, wearer);
         }
     }
 
@@ -137,12 +137,12 @@ namespace roguelike
         }
     }
 
-    public class Lightning : Pickable
+    public class gunshot : Pickable
     {
         protected float range, dmg;
         protected Engine engine;
 
-        public Lightning(float range, float dmg, Engine engine)
+        public gunshot(float range, float dmg, Engine engine)
         {
             this.range = range;
             this.dmg = dmg;
@@ -151,6 +151,7 @@ namespace roguelike
 
         public override bool use(Actor owner, Actor wearer)
         {
+
             Actor closestMon = engine.getClosestMon(wearer.x, wearer.y, range);
             if (closestMon == null)
             {
@@ -164,13 +165,17 @@ namespace roguelike
         }
     }
 
-    public class Fireball : Lightning
+    public class grenade : gunshot
     {
         private Pickable pbase = new Pickable();
+        private List<Actor> dmgArray = new List<Actor>();
 
-        public Fireball(float range, float dmg, Engine engine) : base(range, dmg, engine) { }
+        public grenade(float range, float dmg, Engine engine) : base(range, dmg, engine) { }
         public override bool use(Actor owner, Actor wearer)
         {
+            dmgArray.Clear();
+            dmgArray.TrimExcess();
+
             engine.gui.message(TCODColor.flame, "U/D/L/R to target tile for the fireball, enter to select, or esc to cancel.");
             int x = 0, y = 0;
             if (!engine.pickTile(ref x, ref y))
@@ -178,24 +183,24 @@ namespace roguelike
                 return false;
             }
             engine.gui.message(TCODColor.cyan, String.Format("The fireball explodes, burning everything within {0} tiles!", range));
-            try
+            foreach (Actor mon in engine.actors)
             {
-                foreach (Actor mon in engine.actors)
+                if (mon.destruct != null && !mon.destruct.isDead() && mon.getDist(x, y) <= range)
                 {
-                    if (mon.destruct != null && !mon.destruct.isDead() && mon.getDist(x, y) <= range)
-                    {
-                        engine.gui.message(TCODColor.orange, String.Format("The {0} burns for {1} points of damage.", mon.name, dmg));
-                        mon.destruct.takeDamage(mon, dmg);
-                    }
+                    engine.gui.message(TCODColor.orange, String.Format("The {0} burns for {1} points of damage.", mon.name, dmg));
+                    dmgArray.Add(mon);
                 }
             }
-            catch
+
+            foreach (Actor mon in dmgArray)
             {
-                // FIX THIS BUG
+                mon.destruct.takeDamage(mon, dmg);
             }
+
             return pbase.use(owner, wearer);
         }
     }
+    
 
     public class Container
     {
