@@ -68,6 +68,11 @@ namespace roguelike
             }
         }
 
+        public virtual bool use(Actor owner, Actor wearer, Engine engine)
+        {
+            return use(owner, wearer);
+        }
+
         public virtual bool use(Actor owner, Actor wearer)
         {
             if (wearer.contain != null)
@@ -79,12 +84,104 @@ namespace roguelike
         }
     }
 
+    public class Door : Pickable
+    {
+        bool used = false;
+
+        public override bool use(Actor actor, Actor owner)
+        {
+            if (!used)
+            {
+                actor.ch = '/';
+                used = true;
+                return used;
+            }
+
+            return false;
+        }
+    }
+
+    public class Trigger : Pickable
+    {
+        bool used = false;
+        char triggernum;
+
+        public Trigger(char num)
+        {
+            triggernum = num;
+        }
+
+        public override bool use(Actor actor, Actor owner, Engine engine)
+        {
+            if (!used)
+            {
+                string message = "";
+                TCODConsole con = new TCODConsole(Globals.INV_WIDTH, Globals.INV_HEIGHT);
+                con.setForegroundColor(new TCODColor(200, 200, 150));
+                con.printFrame(0, 0, Globals.INV_WIDTH, Globals.INV_HEIGHT, true, TCODBackgroundFlag.Default, "Story");
+                if (triggernum == '(')
+                {
+                    message = Globals.story[engine.gameState.curLevel, 9];
+                }
+                else if (triggernum == ')')
+                {
+                    message = Globals.story[engine.gameState.curLevel, 10];
+                }
+                else
+                {
+                    message = Globals.story[engine.gameState.curLevel, (int)Char.GetNumericValue(triggernum) - 1];
+                }
+                if (message.Length > 41)
+                {
+                    string sub1 = message.Substring(0, 41);
+                    string sub2 = message.Substring(41, message.Length - 41);
+                    if (sub2.Length > 41)
+                    {
+                        string sub3 = sub2.Substring(0, 41);
+                        sub2 = sub2.Substring(41, sub2.Length - 41);
+                        
+                        con.print(3, 3, sub1);
+                        con.print(3, 4, sub3);
+                        con.print(3, 5, sub2);
+                    }
+                    else
+                    {
+                        con.print(3, 3, sub1);
+                        con.print(3, 4, sub2);
+                    }
+                }
+                else
+                {
+                    con.print(3, 3, message);
+                }
+
+                con.print(13, 15, "Press Enter to Continue");
+
+                TCODConsole.blit(con, 0, 0, Globals.INV_WIDTH, Globals.INV_HEIGHT, TCODConsole.root, Globals.WIDTH / 2 - Globals.INV_WIDTH / 2, Globals.HEIGHT / 2 - Globals.INV_HEIGHT / 2);
+                TCODConsole.flush();
+
+                while(true)
+                {
+                    TCODKey key = TCODConsole.checkForKeypress();
+                    if(key.KeyCode == TCODKeyCode.Enter){
+                        break;
+                    }
+                }
+               
+
+                used = true;
+                return used;
+            }
+
+            return false;
+        }
+    }
+
     public class Confuser : Pickable
     {
         int turnCount = 0;
         float range = 0;
         Engine engine = null;
-        private Pickable pbase = new Pickable();
 
         public Confuser(int turnCount, float range, Engine engine)
         {
@@ -108,8 +205,8 @@ namespace roguelike
 
             ConfusedMonAI confusedAI = new ConfusedMonAI(turnCount, actor.ai);
             actor.ai = confusedAI;
-            engine.gui.message(TCODColor.lightGreen, "{0} looks to be concused and confused", actor.name);
-            return pbase.use(owner, wearer);
+            engine.gui.message(TCODColor.lightGreen, "{0} looks to be concussed and confused", actor.name);
+            return base.use(owner, wearer);
         }
     }
 
@@ -137,40 +234,87 @@ namespace roguelike
         }
     }
 
-    public class gunshot : Pickable
+    public class Gun
     {
         protected float range, dmg;
         protected Engine engine;
+        private Actor dmgdMon;
 
-        public gunshot(float range, float dmg, Engine engine)
+        public Gun(float range, float dmg)
         {
+            this.range = range;
+            this.dmg = dmg;
+        }
+
+        public bool use(Gun owner, Actor wearer, Engine engine)
+        {
+            int x = 0, y = 0;
+
+            engine.gui.message(TCODColor.lightBlue, "Picking a target...a dangerous game.");
+            if (!engine.pickTile(ref x, ref y))
+            {
+                return false;
+            }
+
+            foreach (Actor mon in engine.actors)
+            {
+                if (mon.destruct != null && !mon.destruct.isDead() && mon.x == x && mon.y == y)
+                {
+                    engine.gui.message(TCODColor.lightBlue, "A gun shot strikes {0} for {1} pt of dmg", mon.name, dmg.ToString());
+                    dmgdMon = mon;
+                }
+            }
+            if (dmgdMon != null)
+            {
+                dmgdMon.destruct.takeDamage(dmgdMon, dmg);
+            }
+            else
+            {
+                engine.gui.message(TCODColor.lightBlue, "A miss. No good.");
+            }
+            return true;
+        }
+    }
+
+    public class ammo : Pickable
+    {
+        protected Engine engine;
+
+        public ammo(Engine engine)
+        {
+            this.engine = engine;
+        }
+
+        public override bool use(Actor owner, Actor wearer, Engine engine)
+        {
+            if (engine.gameState.curAmmo == 6)
+            {
+                engine.gui.message(TCODColor.celadon, "We'll hold onto this for later. The cylinder is full.");
+                return false;
+            }
+            else
+            {
+                engine.gameState.curAmmo++;
+                engine.gui.message(TCODColor.celadon, "The round falls into the cylinder with a metallic click..");
+                return base.use(owner, wearer);
+            }
+        }
+    }
+
+    public class grenade : Pickable
+    {
+        private Pickable pbase = new Pickable();
+        private List<Actor> dmgArray = new List<Actor>();
+        private float range;
+        private float dmg;
+        protected Engine engine;
+
+        public grenade(float range, float dmg, Engine engine) {
             this.range = range;
             this.dmg = dmg;
             this.engine = engine;
         }
 
-        public override bool use(Actor owner, Actor wearer)
-        {
-
-            Actor closestMon = engine.getClosestMon(wearer.x, wearer.y, range);
-            if (closestMon == null)
-            {
-                engine.gui.message(TCODColor.gold, "No enemy is in range");
-                return false;
-            }
-            engine.gui.message(TCODColor.lightBlue, "A lightning bolt strikes {0} for {1} pt of dmg", closestMon.name, dmg.ToString());
-            closestMon.destruct.takeDamage(closestMon, dmg);
-
-            return base.use(owner, wearer);
-        }
-    }
-
-    public class grenade : gunshot
-    {
-        private Pickable pbase = new Pickable();
-        private List<Actor> dmgArray = new List<Actor>();
-
-        public grenade(float range, float dmg, Engine engine) : base(range, dmg, engine) { }
         public override bool use(Actor owner, Actor wearer)
         {
             dmgArray.Clear();
@@ -467,6 +611,7 @@ namespace roguelike
         public AI ai;
         public Pickable pick;
         public Container contain;
+        public Gun gun;
         public Portal portal;
 
         public Actor(int x, int y, int ch, string name, TCODColor col)
@@ -483,6 +628,14 @@ namespace roguelike
             this.pick = null;
             this.contain = null;
             this.portal = null;
+            if (name == "player")
+            {
+                this.gun = new Gun(10, 10);
+            }
+            else
+            {
+                this.gun = null;
+            }
         }
 
         public void render() {

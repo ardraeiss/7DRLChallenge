@@ -92,42 +92,42 @@ namespace roguelike
             actors.Add(player);
             fovRadius = 10;
 
-            map = new Map(Globals.WIDTH, Globals.HEIGHT-Globals.PANEL, fromload, this);
-            this.gui = new GUI();
+            map = new Map(Globals.WIDTH, Globals.HEIGHT-Globals.PANEL, this);
+            this.gui = new GUI(this);
         }
 
         public void loadInv()
         {
             foreach (String item in gameState.inventory)
             {
-                if (item == "Bandage")
+                if (item == "bandage")
                 {
-                    Actor healthpot = new Actor(0, 0, '!', "Bandage", TCODColor.violet);
+                    Actor healthpot = new Actor(0, 0, '!', "bandage", TCODColor.violet);
                     healthpot.blocks = false;
                     healthpot.pick = new Healer(4);
 
                     player.contain.inventory.Add(healthpot);
                 }
-                else if (item == "Throw rock")
+                else if (item == "rock")
                 {
-                    Actor confuse = new Actor(0, 0, '#', "Throw rock", TCODColor.darkBlue);
+                    Actor confuse = new Actor(0, 0, '#', "rock", TCODColor.darkBlue);
                     confuse.blocks = false;
                     confuse.pick = new Confuser(10, 10, this);
 
                     player.contain.inventory.Add(confuse);
                 }
-                else if (item == "Gun shot"){
-                    Actor light = new Actor(0, 0, '#', "Gun shot", TCODColor.darkYellow);
+                else if (item == "ammo"){
+                    Actor light = new Actor(0, 0, '#', "ammo", TCODColor.darkYellow);
                     light.blocks = false;
-                    light.pick = new gunshot(10, 10, this);
+                    light.pick = new ammo(this);
 
                     player.contain.inventory.Add(light);
                 }
-                else if (item == "Fire bomb")
+                else if (item == "grenade")
                 {
-                    Actor fire = new Actor(0, 0, '#', "Fire bomb", TCODColor.darkRed);
+                    Actor fire = new Actor(0, 0, '#', "Fire grenade", TCODColor.darkRed);
                     fire.blocks = false;
-                    fire.pick = new grenade(10, 10, this);
+                    fire.pick = new grenade(5, 10, this);
 
                     player.contain.inventory.Add(fire);
                 }

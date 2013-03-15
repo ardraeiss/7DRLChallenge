@@ -11,14 +11,12 @@ namespace roguelike
     {
         private bool cW;
         private bool explored;
+        public char prop;
+        private bool outside;
+
         public bool canWalk { get { return cW; } set { cW = value; } }
         public bool isExplored { get { return explored; } set { explored = value; } }
-
-        public Tile(bool cW, bool explored)
-        {
-            this.cW = cW;
-            this.explored = explored;
-        }
+        public bool isOutside { get { return outside; } set { outside = value; } }
     }
 
     [Serializable()]
@@ -68,19 +66,17 @@ namespace roguelike
         int width, height;
         int lastx, lasty;
         public int entx, enty, exx, exy;
-        bool fromload;
         Engine engine;
         TCODMap tmap;
         public Tile[] tiles;
         List<Room> rooms;
         State gameState;
 
-        public Map(int width, int height, bool fromload, Engine engine)
+        public Map(int width, int height, Engine engine)
         {
             this.tiles = new Tile[width * height];
             this.tmap = new TCODMap(width, height);
             this.gameState = engine.gameState;
-            this.fromload = fromload;
 
             this.rooms = new List<Room>();
 
@@ -88,14 +84,7 @@ namespace roguelike
             this.height = height;
             this.engine = engine;
 
-            if (!fromload)
-            {
-                genMap();
-            }
-            else
-            {
-                reGenMap(gameState.levellist[gameState.curLevel].theLayout, false, true);
-            }
+            reGenMap(gameState.levellist[gameState.curLevel].theLayout, false, true);
         }
 
         public void changeLevel(bool forward)
@@ -125,12 +114,12 @@ namespace roguelike
 
         public void loadMap(Tile[] nextLvl, bool forward)
         {
+            engine.gui.loadMapImg();
             if (nextLvl == null)
             {
                 genMap();
                 return;
             }
-
             reGenMap(nextLvl, forward);
             return;
         }
@@ -226,7 +215,7 @@ namespace roguelike
                 prevLevel.portal = new Portal(this, false);
                 engine.actors.Add(prevLevel);
             }
-            else if (loaded && gameState.curLevel == 0)
+            else if (loaded)
             {
                 engine.player.x = gameState.levellist[gameState.curLevel].startx - 1;
                 engine.player.y = gameState.levellist[gameState.curLevel].starty;
@@ -272,13 +261,17 @@ namespace roguelike
                     {
                         tmap.setProperties(x, y, true, true);
                     }
+                    if (tiles[x + y * width].prop != '0')
+                    {
+                        renderProp(x, y, tiles[x + y * width].prop);
+                    }
                 }
             }
 
             /// UGLY ugly function used for reloading actors and their positions
             foreach (ActorStore actordata in gameState.levellist[gameState.curLevel].actors)
             {
-                if(actordata.name == "Thug" || actordata.name == "Gangster")
+                if(actordata.name == "thug" || actordata.name == "gangster")
                 {
                     // IN ELEGANT -- FIX IF CAN
                     if (actordata.dead == true)
@@ -289,9 +282,9 @@ namespace roguelike
                     }
                     else
                     {
-                        if (actordata.name == "Thug")
+                        if (actordata.name == "thug")
                         {
-                            Actor mon = new Actor(actordata.x, actordata.y, 't', "Thug", TCODColor.darkBlue);
+                            Actor mon = new Actor(actordata.x, actordata.y, 't', "thug", TCODColor.darkBlue);
                             mon.destruct = new MonsterDestructible(10, 0, "dead thug", engine);
                             mon.attacker = new Attacker(3);
                             mon.ai = new MonsterAI();
@@ -299,46 +292,101 @@ namespace roguelike
                         }
                         else
                         {
-                            Actor mon = new Actor(actordata.x, actordata.y, 'g', "Gangster", TCODColor.darkCrimson);
+                            Actor mon = new Actor(actordata.x, actordata.y, 'g', "gangster", TCODColor.darkCrimson);
                             mon.destruct = new MonsterDestructible(10, 0, "dead gangster", engine);
                             mon.attacker = new Attacker(3);
                             mon.ai = new MonsterAI();
                             engine.actors.Add(mon);
                         }
                     }
-                } else if(actordata.name == "Bandage") {
-                    Actor healthpot = new Actor(actordata.x, actordata.y, '!', "Bandage", TCODColor.violet);
+                } else if(actordata.name == "bandage") {
+                    Actor healthpot = new Actor(actordata.x, actordata.y, '!', "bandage", TCODColor.violet);
                     healthpot.blocks = false;
                     healthpot.pick = new Healer(4);
 
                     engine.actors.Add(healthpot);
                 }
-                else if (actordata.name == "Throw rock")
+                else if (actordata.name == "rock")
                 {
-                    Actor confuse = new Actor(actordata.x, actordata.y, '#', "Throw rock", TCODColor.darkBlue);
+                    Actor confuse = new Actor(actordata.x, actordata.y, '#', "rock", TCODColor.darkBlue);
                     confuse.blocks = false;
                     confuse.pick = new Confuser(10, 10, engine);
 
                     engine.actors.Add(confuse);
                 }
-                else if (actordata.name == "Gun shot"){
-                    Actor light = new Actor(actordata.x, actordata.y, '#', "Gun shot", TCODColor.darkYellow);
+                else if (actordata.name == "ammo"){
+                    Actor light = new Actor(actordata.x, actordata.y, '#', "ammo", TCODColor.darkYellow);
                     light.blocks = false;
-                    light.pick = new gunshot(10, 10, engine);
+                    light.pick = new ammo(engine);
 
                     engine.actors.Add(light);
                 }
-                else if (actordata.name == "Fire bomb")
+                else if (actordata.name == "grenade")
                 {
-                    Actor fire = new Actor(actordata.x, actordata.y, '#', "Fire bomb", TCODColor.darkRed);
+                    Actor fire = new Actor(actordata.x, actordata.y, '#', "grenade", TCODColor.darkRed);
                     fire.blocks = false;
-                    fire.pick = new grenade(10, 10, engine);
+                    fire.pick = new grenade(5, 10, engine);
 
                     engine.actors.Add(fire);
                 }
             }
 
             return;
+        }
+
+        public void renderProp(int x, int y, char prop)
+        {
+            if (prop == '#')
+            {
+                Actor theprop = new Actor(x, y, '#', "desk", new TCODColor(102, 66, 37));
+                theprop.blocks = true;
+                engine.actors.Add(theprop);
+            }
+            else if (prop == '%')
+            {
+                Actor theprop = new Actor(x, y, '%', "a body", TCODColor.desaturatedRed);
+                theprop.blocks = false;
+                engine.actors.Add(theprop);
+            }
+            else if (prop == '+')
+            {
+                Actor door = new Actor(x, y, '+', "door", new TCODColor(102, 66, 37));
+                door.blocks = false;
+                door.pick = new Door();
+                tmap.setProperties(x, y, false, true);
+                engine.actors.Add(door);
+            }
+            else if (prop == '!')
+            {
+                Actor healthpot = new Actor(x, y, '!', "bandage", TCODColor.violet);
+                healthpot.blocks = false;
+                healthpot.pick = new Healer(4);
+
+                engine.actors.Add(healthpot);
+            }
+            else if (prop == 'a')
+            {
+                Actor gun = new Actor(x, y, '#', "ammo", TCODColor.darkYellow);
+                gun.blocks = false;
+                gun.pick = new ammo(engine);
+
+                engine.actors.Add(gun);
+            }
+            else if (prop == 'o')
+            {
+                Actor confuse = new Actor(x, y, '#', "rock", TCODColor.darkBlue);
+                confuse.blocks = false;
+                confuse.pick = new Confuser(10, 10, engine);
+
+                engine.actors.Add(confuse);
+            }
+            else if (Char.IsNumber(prop) || prop == '(' || prop == ')')
+            {
+                Actor story = new Actor(x, y, ' ', "trigger", new TCODColor(102, 66, 37));
+                story.blocks = false;
+                story.pick = new Trigger(prop);
+                engine.actors.Add(story);
+            }
         }
 
         public bool isWall(int x, int y)
@@ -383,17 +431,51 @@ namespace roguelike
         }
 
         public void render() {
-            TCODColor darkWall = TCODColor.darkerGrey;
-            TCODColor darkGround = TCODColor.darkGrey;
-            TCODColor lightWall = new TCODColor(148, 148, 148);
-            TCODColor lightGround = new TCODColor(105, 105, 105);
+            TCODColor darkWall;
+            TCODColor darkGround;
+            TCODColor lightWall;
+            TCODColor lightGround;
+            TCODColor grass = TCODColor.desaturatedGreen;
+            TCODColor darkgrass = TCODColor.darkGreen;
+
+            if (engine.gameState.curLevel == 0 || engine.gameState.curLevel == 1 || engine.gameState.curLevel == 4)
+            {
+                darkWall = new TCODColor(84, 75, 55);
+                darkGround = new TCODColor(160, 148, 120);
+                lightWall = new TCODColor(84, 64, 18);
+                lightGround = new TCODColor(165, 126, 36);
+            }
+            else
+            {
+                darkWall = TCODColor.darkerGrey;
+                darkGround = TCODColor.darkGrey;
+                lightWall = TCODColor.grey;
+                lightGround = TCODColor.lighterGrey;
+            }
 
             for(int x = 0; x < width; x++) {
                 for(int y = 0; y < height; y++) {
-                    if(isInView(x,y)) {
-                        TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? lightWall : lightGround);
-                    } else if (isExplored(x, y)) {
-                        TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? darkWall : darkGround);
+                    if (tiles[x + y * width].isOutside)
+                    {
+                        if (isInView(x, y))
+                        {
+                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? lightWall : grass);
+                        }
+                        else if (isExplored(x, y))
+                        {
+                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? darkWall : darkgrass);
+                        }
+                    }
+                    else
+                    {
+                        if (isInView(x, y))
+                        {
+                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? lightWall : lightGround);
+                        }
+                        else if (isExplored(x, y))
+                        {
+                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? darkWall : darkGround);
+                        }
                     }
                 }
             }
@@ -416,15 +498,15 @@ namespace roguelike
                 int x = TCODRandom.getInstance().getInt(room.x1+1, room.x2-1);
                 int y = TCODRandom.getInstance().getInt(room.y1+1, room.y2-1);
                 
-                if (random < .01)
+                if (random < .5)
                 {
-                    Actor healthpot = new Actor(x, y, '!', "Bandage", TCODColor.violet);
+                    Actor healthpot = new Actor(x, y, '!', "bandage", TCODColor.violet);
                     healthpot.blocks = false;
                     healthpot.pick = new Healer(4);
 
                     engine.actors.Add(healthpot);
                 }
-                else if (random >= .02 && random < .99)
+                else if (random >= .5 && random < .6)
                 {
                     Actor confuse = new Actor(x, y, '#', "rock", TCODColor.darkBlue);
                     confuse.blocks = false;
@@ -432,10 +514,10 @@ namespace roguelike
 
                     engine.actors.Add(confuse);
                 }
-                else if (random >= .02 && random < .01){
+                else if (random >= .6 && random < .9){
                     Actor gun = new Actor(x, y, '#', "ammo", TCODColor.darkYellow);
                     gun.blocks = false;
-                    gun.pick = new gunshot(10, 10, engine);
+                    gun.pick = new ammo(engine);
 
                     engine.actors.Add(gun);
                 } else
@@ -459,7 +541,7 @@ namespace roguelike
 
                 if (TCODRandom.getInstance().getInt(0, 100) < 80)
                 {
-                    Actor mon = new Actor(mx, my, 't', "Thug", TCODColor.darkCyan);
+                    Actor mon = new Actor(mx, my, 't', "thug", TCODColor.darkCyan);
                     mon.destruct = new MonsterDestructible(10, 0, "dead thug", engine);
                     mon.attacker = new Attacker(3);
                     mon.ai = new MonsterAI();
@@ -467,7 +549,7 @@ namespace roguelike
                 }
                 else
                 {
-                    Actor mon = new Actor(mx, my, 'g', "Gangster", TCODColor.darkCrimson);
+                    Actor mon = new Actor(mx, my, 'g', "gangster", TCODColor.darkCrimson);
                     mon.destruct = new MonsterDestructible(10, 0, "dead gangster", engine);
                     mon.attacker = new Attacker(3);
                     mon.ai = new MonsterAI();

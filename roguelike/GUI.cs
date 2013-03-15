@@ -39,8 +39,7 @@ namespace roguelike
 
         public MenuCode pick()
         {
-            TCODImage img = new TCODImage("menu_background1.png");
-            System.Diagnostics.Debug.WriteLine(Environment.CurrentDirectory.ToString());
+            TCODImage img = new TCODImage("assets/menu_background1.png");
             int selected = 0;
 
             while (!TCODConsole.isWindowClosed())
@@ -90,6 +89,10 @@ namespace roguelike
     public class GUI
     {
         TCODConsole con;
+        Engine engine;
+        TCODImage img;
+        bool init = true;
+
         struct Message
         {
             public string text;
@@ -97,25 +100,33 @@ namespace roguelike
         };
         List<Message> log = new List<Message>();
 
-        public GUI()
+        public GUI(Engine engine)
         {
+            this.engine = engine;
             this.con = new TCODConsole(Globals.WIDTH, Globals.PANEL);
+            this.img = new TCODImage("assets/levels/map" + (engine.gameState.curLevel + 1) + ".png");
+        }
+
+        public void loadMapImg()
+        {
+            img.clear(TCODColor.black);
+            img = new TCODImage("assets/levels/map" + (engine.gameState.curLevel + 1) + ".png");
         }
 
         public void render(Engine engine)
         {
+            if (init)
+            {
+                loadMapImg();
+                init = false;
+            }
             con.setBackgroundColor(TCODColor.black);
             con.clear();
             renderBar(1, 1, Globals.BWIDTH, "HP", engine.player.destruct.hp, engine.player.destruct.maxHP, TCODColor.lightRed, TCODColor.darkerRed);
-
-            con.print(Globals.WIDTH - 16, 0, " Revolver ");
-
-            con.putChar(Globals.WIDTH - 12, 2, (int)TCODSpecialCharacter.Bullet);
-            con.putChar(Globals.WIDTH - 13, 3, (int)TCODSpecialCharacter.Bullet);
-            con.putChar(Globals.WIDTH - 11, 3, (int)TCODSpecialCharacter.Bullet);
-            con.putChar(Globals.WIDTH - 13, 4, (int)TCODSpecialCharacter.Bullet);
-            con.putChar(Globals.WIDTH - 11, 4, (int)TCODSpecialCharacter.Bullet);
-            con.putChar(Globals.WIDTH - 12, 5, (int)TCODSpecialCharacter.Bullet);
+            renderCyl(engine);
+            con.print(Globals.WIDTH - 18, 1, " Revolver ");
+            img.blit2x(TCODConsole.root, 0, 0);
+            
 
             int y = 1;
             float colorChanger = 0.4f;
@@ -129,6 +140,64 @@ namespace roguelike
                 }
             }
             TCODConsole.blit(con, 0, 0, Globals.WIDTH, Globals.PANEL, TCODConsole.root, 0, Globals.HEIGHT - Globals.PANEL);
+        }
+
+        protected void renderCyl(Engine engine)
+        {
+            if (engine.gameState.curAmmo == 6)
+            {
+                con.putChar(Globals.WIDTH - 13, 3, (int)TCODSpecialCharacter.Bullet);
+            }
+            else
+            {
+                con.putChar(Globals.WIDTH - 13, 3, (int)TCODSpecialCharacter.BulletInv);
+            }
+
+            if (engine.gameState.curAmmo >= 5)
+            {
+                con.putChar(Globals.WIDTH - 13, 4, (int)TCODSpecialCharacter.Bullet);
+            }
+            else
+            {
+                con.putChar(Globals.WIDTH - 13, 4, (int)TCODSpecialCharacter.BulletInv);
+            }
+
+            if (engine.gameState.curAmmo >= 4)
+            {
+                con.putChar(Globals.WIDTH - 14, 5, (int)TCODSpecialCharacter.Bullet);
+            }
+            else
+            {
+                con.putChar(Globals.WIDTH - 14, 5, (int)TCODSpecialCharacter.BulletInv);
+            }
+
+            if (engine.gameState.curAmmo >= 3)
+            {
+                con.putChar(Globals.WIDTH - 15, 4, (int)TCODSpecialCharacter.Bullet);
+            }
+            else
+            {
+                con.putChar(Globals.WIDTH - 15, 4, (int)TCODSpecialCharacter.BulletInv);
+            }
+
+            if (engine.gameState.curAmmo >= 2)
+            {
+                con.putChar(Globals.WIDTH - 15, 3, (int)TCODSpecialCharacter.Bullet);
+            }
+            else
+            {
+                con.putChar(Globals.WIDTH - 15, 3, (int)TCODSpecialCharacter.BulletInv);
+            }
+
+            if (engine.gameState.curAmmo >= 1)
+            {
+                con.putChar(Globals.WIDTH - 14, 2, (int)TCODSpecialCharacter.Bullet);
+            }
+            else
+            {
+                con.putChar(Globals.WIDTH - 14, 2, (int)TCODSpecialCharacter.BulletInv);
+            }
+            
         }
 
         public void renderBar(int x, int y, int width, string name, float value, float maxValue, TCODColor bColor, TCODColor backColor)
@@ -151,6 +220,12 @@ namespace roguelike
         {
             Message aMsg = new Message();
             aMsg.color = color;
+
+            if (maintxt.Length > 75)
+            {
+                message(color, maintxt.Substring(75, maintxt.Length - 75).Insert(0, "-"));
+                maintxt = maintxt.Substring(0, 75);
+            }
             if (messages.Length > 1)
             {
                 aMsg.text = String.Format(maintxt, messages);

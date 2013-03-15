@@ -27,6 +27,7 @@ namespace roguelike
         public Level[] levellist = new Level[5];
         public List<ActorStore> actorlist = new List<ActorStore>();
         public int curLevel = 0;
+        public int curAmmo = 0;
         public float curHp = 0;
         public List<string> inventory = new List<string>();
         public int ammo = 0;
@@ -34,6 +35,7 @@ namespace roguelike
         public SaveState(State state, Actor player)
         {
             this.levellist = state.levellist;
+            this.curAmmo = state.curAmmo;
             this.actorlist = new List<ActorStore>(state.actorlist);
             this.curLevel = state.curLevel;
             this.curHp = player.destruct.hp;
@@ -50,14 +52,21 @@ namespace roguelike
         public List<ActorStore> actorlist = new List<ActorStore>();
         public int curLevel = 0;
         public float curhp = 0;
+        public int curAmmo = 0;
         public List<string> inventory = new List<string>();
+        private LevelConverter parser;
 
         public State() {
-            levellist[0].isRandom = true;
-            levellist[1].isRandom = true;
+            parser = new LevelConverter(levellist);
+            levellist[0].isRandom = false;
+            levellist[0].theLayout = parser.txtToLvl(1); 
+            levellist[1].isRandom = false;
+            levellist[1].theLayout = parser.txtToLvl(2); 
             levellist[2].isRandom = true;
             levellist[3].isRandom = true;
-            levellist[4].isRandom = true;
+            levellist[4].isRandom = false;
+            levellist[4].theLayout = parser.txtToLvl(5); 
+            this.curAmmo = 6;
         }
 
         public State(SaveState saved)
@@ -129,7 +138,7 @@ namespace roguelike
     public static class Globals
     {
         // SAVE GAME
-        public const string SAVE = @"..\savegame\save.bin";
+        public const string SAVE = @"assets\savegame\save.bin";
 
         // RESOLUTION GLOBALS
         public const int HEIGHT = 80;
@@ -162,5 +171,54 @@ namespace roguelike
         public const int INV_WIDTH = 50;
         public const int INV_HEIGHT = 28;
 
+        // STORY GLOBALS
+        public static string[,] story = new string[,]
+        {
+            {
+            "I wake up in a haze... I'm in my office, alone, with a large lump on my head.     Where's the dame, and what happened here?",
+            "Bob's remains are splattered on the floor next to his desk. At least he went      out with a fight.",
+            "Two thugs are waiting for me in the lobby. Chumps. I'll give 'em the old one      -two for Bobby.",
+            "The entrance to our office. I should probably get outta the office building       and get some fresh air.",
+            "The storage room. Always gave me the heebys",
+            "Utilities and maintance. Not sure whats back this way. Smells like shit",
+            "The lobby..they even got the receptionist. Poor Sally.",
+            "7, no 8...10 goons near my car. I gotta find another way outta here",
+            "An auxillary exit...score",
+            "Nothing in the closet",
+            "No one in the security office. Typical."
+            },
+            {
+             "I wake up in a haze... I'm in my office, alone, with a large lump on my head. Where's the dame, and what happened here?",
+            "Bob's remains are splattered on the floor next to his desk. At least he went out with a fight.",
+            "Two thugs are waiting for me in the lobby. Chumps. I'll give 'em the old one-two for old Bobby.",
+            "The entrance to our office. I should probably get outta the office building and get some fresh air.",
+            "The storage room. Always gave me the heebys",
+            "Utilities and maintance. Not sure whats back this way. Smells like shit",
+            "The lobby...they even got the receptionist. Poor Sally.",
+            "7, no 8...10 goons near my car. I gotta find another way outta here",
+            "An auxillary exit...score",
+            "Nothing in the closet",
+            "No one in the security office. Typical."
+            },
+            {
+                "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"
+            },
+            {
+                "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"
+            },
+            {
+             "I wake up in a haze... I'm in my office, alone, with a large lump on my head. Where's the dame, and what happened here?",
+            "Bob's remains are splattered on the floor next to his desk. At least he went out with a fight.",
+            "Two thugs are waiting for me in the lobby. Chumps. I'll give 'em the old one-two for old Bobby.",
+            "The entrance to our office. I should probably get outta the office building and get some fresh air.",
+            "The storage room. Always gave me the heebys",
+            "Utilities and maintance. Not sure whats back this way. Smells like shit",
+            "The lobby...they even got the receptionist. Poor Sally.",
+            "7, no 8...10 goons near my car. I gotta find another way outta here",
+            "An auxillary exit...score",
+            "Nothing in the closet",
+            "No one in the security office. Typical."
+            }
+        };
     }
 }

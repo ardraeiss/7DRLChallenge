@@ -109,7 +109,7 @@ namespace roguelike
                                 if (actor.pick.pick(actor, player, engine))
                                 {
                                     found = true;
-                                    engine.gui.message(TCODColor.silver, "You pick up a {0}", actor.name);
+                                    engine.gui.message(TCODColor.silver, "You pick up {0}", actor.name);
                                     break;
                                 }
                                 else if (!found)
@@ -130,7 +130,7 @@ namespace roguelike
                         Actor item = inventory(player);
                         if (item != null)
                         {
-                            item.pick.use(item, player);
+                            item.pick.use(item, player, engine);
                             engine.gStatus = Engine.Status.NEWT;
                         }
                     }
@@ -145,6 +145,19 @@ namespace roguelike
                         }
                     }
                     break;
+                case 's':
+                    {
+                        if (engine.gameState.curAmmo >= 1)
+                        {
+                            engine.gameState.curAmmo--;
+                            engine.player.gun.use(engine.player.gun, engine.player, engine);
+                        }
+                        else
+                        {
+                            engine.gui.message(TCODColor.azure, "No beans...no ammo either.");
+                        }
+                    }
+                    break;
                 default: break;
             }
         }
@@ -152,32 +165,38 @@ namespace roguelike
         public bool moveAttack(Actor owner, int tarx, int tary, Engine engine)
         {
             if (engine.map.isWall(tarx, tary)) return false;
-            try
-            {
-                foreach (Actor actor in engine.actors)
+            foreach (Actor actor in engine.actors)
                 {
                     if (actor.destruct != null && !actor.destruct.isDead() && actor.x == tarx && actor.y == tary)
                     {
                         owner.attacker.attack(owner, actor, engine);
                         return false;
                     }
-                    else if (((actor.destruct != null && actor.destruct.isDead()) || actor.pick != null) && actor.x == tarx && actor.y == tary)
+                    else if (((actor.destruct != null && actor.destruct.isDead()) || actor.pick != null && actor.name != "door" && actor.name != "trigger") && actor.x == tarx && actor.y == tary)
                     {
-                        engine.gui.message(TCODColor.lightGrey, "There's a(n) {0} here", actor.name);
+                        engine.gui.message(TCODColor.lightGrey, "{0}...", actor.name);
                     }
                     else if (actor.portal != null && actor.x == tarx && actor.y == tary)
                     {
                         changingLevel = true;
                         actor.portal.use(owner, actor);
-                        engine.gui.message(TCODColor.purple, "You go down the stairs...");
+                        engine.gui.message(TCODColor.purple, "Onwards...");
                         break;
                     }
+                    else if (actor.name == "door" && actor.x == tarx && actor.y == tary)
+                    {
+                        actor.pick.use(actor, actor);
+                    }
+                    else if (actor.name == "trigger" && actor.x == tarx && actor.y == tary)
+                    {
+                        actor.pick.use(actor, actor, engine);
+                    }
+                    else if (actor.blocks && actor.x == tarx && actor.y == tary)
+                    {
+                        return false;
+                    }
                 }
-            }
-            catch (InvalidOperationException e)
-            {
-                System.Diagnostics.Debug.WriteLine("Exception in player moveAttack: {0}", e.Message);
-            }
+
 
             if (!changingLevel)
             {

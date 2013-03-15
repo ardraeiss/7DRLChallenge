@@ -6,8 +6,8 @@ c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\De
 c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Debug\roguelike.exe
 c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Debug\roguelike.pdb
 c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Debug\libtcod-net.dll
-c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Debug\roguelike.csprojResolveAssemblyReference.cache
 c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Debug\roguelike.Properties.Resources.resources
 c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Debug\roguelike.csproj.GenerateResource.Cache
 c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Debug\roguelike.exe
 c:\users\justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Debug\roguelike.pdb
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Debug\roguelike.csprojResolveAssemblyReference.cache
