@@ -183,41 +183,41 @@ namespace roguelike
             "Utilities and maintance. Not sure whats back this way. Smells like shit",
             "The lobby..they even got the receptionist. Poor Sally.",
             "7, no 8...10 goons near my car. I gotta find another way outta here",
-            "An auxillary exit...score",
+            "An auxillary exit...right on time.",
             "Nothing in the closet",
             "No one in the security office. Typical."
             },
             {
-             "I wake up in a haze... I'm in my office, alone, with a large lump on my head. Where's the dame, and what happened here?",
-            "Bob's remains are splattered on the floor next to his desk. At least he went out with a fight.",
-            "Two thugs are waiting for me in the lobby. Chumps. I'll give 'em the old one-two for old Bobby.",
-            "The entrance to our office. I should probably get outta the office building and get some fresh air.",
-            "The storage room. Always gave me the heebys",
-            "Utilities and maintance. Not sure whats back this way. Smells like shit",
-            "The lobby...they even got the receptionist. Poor Sally.",
+            "Nothing for me this way...I'm no coward.",
+            "I remember to take the girls file with me when I left. This check out of her       address. Time for a look.",
+            "The only thing in the house was a used Cuban 375 Reservo cigar. I have a hunch     who is behind this",
+            "She came to me scared, alone. Someone big was behind this...with a lot of man      power.",
+            "Only Don Corontini fits the profile. His mansion is on the outskirts of town.     Luckily I know shortcut through the sewers",
+            "Empty .....",
+            "Nothing in the bedroom...except a burned out cigar...",
+            "It had to be a fucking hedge maze. ",
+            "A lot of noise out front; more goons, cars. Gotta split, and fast. I'll try         the back.",
+            "A hedge maze....a fucking hedge maze. Here goes nothing.",
+            "0"
+            },
+            {
+                "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"
+            },
+            {
+                "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"
+            },
+            {
+            "The mansion of Don Corontini. Time to get the girl and get out. She'll probabaly      be in a back room somewhere..",
+            "Leaving the wine celler and I can smell the Don's smoke already. I'll kill that        bastard",
+            "The dame! Succuss tastes damn good. Now time to get us outta here",
+            "Well if it isn't Larry, Curry, Moe, and...goon",
+            "",
+            "Cheap musk, hair gel. Getting closer",
+            "Sweet freedom. Right around the corner",
             "7, no 8...10 goons near my car. I gotta find another way outta here",
-            "An auxillary exit...score",
-            "Nothing in the closet",
-            "No one in the security office. Typical."
-            },
-            {
-                "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"
-            },
-            {
-                "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"
-            },
-            {
-             "I wake up in a haze... I'm in my office, alone, with a large lump on my head. Where's the dame, and what happened here?",
-            "Bob's remains are splattered on the floor next to his desk. At least he went out with a fight.",
-            "Two thugs are waiting for me in the lobby. Chumps. I'll give 'em the old one-two for old Bobby.",
-            "The entrance to our office. I should probably get outta the office building and get some fresh air.",
-            "The storage room. Always gave me the heebys",
-            "Utilities and maintance. Not sure whats back this way. Smells like shit",
-            "The lobby...they even got the receptionist. Poor Sally.",
-            "7, no 8...10 goons near my car. I gotta find another way outta here",
-            "An auxillary exit...score",
-            "Nothing in the closet",
-            "No one in the security office. Typical."
+            "0",
+            "0",
+            "Got the girl, got out. Another successful case closed.                                  THE END."
             }
         };
     }

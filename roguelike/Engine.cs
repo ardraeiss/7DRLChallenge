@@ -326,5 +326,26 @@ namespace roguelike
 
             Environment.Exit(0);
         }
+
+        public void wingame()
+        {
+            foreach (Actor actor in actors)
+            {
+                if (actor.pick != null)
+                {
+                    if (actor.pick is Girl)
+                    {
+                        Girl girl = actor.pick as Girl;
+                        if (girl.follow == true)
+                        {
+                            Actor endgame = new Actor(0, 0, ' ', "", TCODColor.red);
+                            endgame.pick = new Trigger(')');
+                            endgame.pick.use(endgame, endgame);
+                            gStatus = Status.WIN;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

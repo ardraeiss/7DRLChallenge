@@ -89,6 +89,17 @@ namespace roguelike
                             map[x + y * width].isOutside = true;
                         }
                     }
+                    else if (txtmap[x + y * width] == 'W')
+                    {
+                        map[x + y * width].canWalk = true;
+                        ActorStore actor = new ActorStore(x, y, "girl");
+                        levels[levelnum - 1].actors.Add(actor);
+
+                        if (txtmap[x + y * width + 1] == '_' || txtmap[x + y * width - 1] == '_' || txtmap[x + y * width + 1] == '-' || txtmap[x + y * width - 1] == '-')
+                        {
+                            map[x + y * width].isOutside = true;
+                        }
+                    }
                     else if (txtmap[x + y * width] == '>')
                     {
                         levels[levelnum - 1].endx = x;

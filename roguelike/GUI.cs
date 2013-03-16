@@ -39,7 +39,7 @@ namespace roguelike
 
         public MenuCode pick()
         {
-            TCODImage img = new TCODImage("assets/menu_background1.png");
+            TCODImage img = new TCODImage("assets/menu_background.png");
             int selected = 0;
 
             while (!TCODConsole.isWindowClosed())

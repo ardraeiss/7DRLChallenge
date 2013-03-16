@@ -190,29 +190,47 @@ namespace roguelike
             exy = lasty;
 
             Actor nextLevel = new Actor(exx, exy, '>', "stairs", TCODColor.sea);
-            nextLevel.portal = new Portal(this, true);
+            nextLevel.portal = new Portal(this, true, false);
             engine.actors.Add(nextLevel);
             
             if(gameState.curLevel != 0)
             {
                 Actor prevLevel = new Actor(entx, enty, '>', "stairs", TCODColor.sea);
-                prevLevel.portal = new Portal(this, false);
+                prevLevel.portal = new Portal(this, false, false);
                 engine.actors.Add(prevLevel);
             }
         }
 
         public void reGenMap(Tile[] level, bool forward, bool loaded = false)
         {
-            if(forward) {
+            if (gameState.curLevel == 0 || gameState.curLevel == 1)             {
+                engine.player.x = gameState.levellist[gameState.curLevel].startx;
+                engine.player.y = gameState.levellist[gameState.curLevel].starty;
+
+                Actor nextLevel = new Actor(gameState.levellist[gameState.curLevel].endx, gameState.levellist[gameState.curLevel].endy, '>', "stairs", TCODColor.sea);
+                nextLevel.portal = new Portal(this, true, false);
+                engine.actors.Add(nextLevel);
+            }
+            else if (gameState.curLevel == 4)
+            {
+                engine.player.x = gameState.levellist[gameState.curLevel].startx;
+                engine.player.y = gameState.levellist[gameState.curLevel].starty;
+
+                Actor theend = new Actor(gameState.levellist[gameState.curLevel].endx, gameState.levellist[gameState.curLevel].endy, '>', "stairs", TCODColor.sea);
+                theend.portal = new Portal(this, false, true);
+                engine.actors.Add(theend);
+            }
+            else if (forward)
+            {
                 engine.player.x = gameState.levellist[gameState.curLevel].startx - 1;
                 engine.player.y = gameState.levellist[gameState.curLevel].starty;
 
                 Actor nextLevel = new Actor(gameState.levellist[gameState.curLevel].endx, gameState.levellist[gameState.curLevel].endy, '>', "stairs", TCODColor.sea);
-                nextLevel.portal = new Portal(this, true);
+                nextLevel.portal = new Portal(this, true, false);
                 engine.actors.Add(nextLevel);
 
                 Actor prevLevel = new Actor(gameState.levellist[gameState.curLevel].startx, gameState.levellist[gameState.curLevel].starty, '>', "stairs", TCODColor.sea);
-                prevLevel.portal = new Portal(this, false);
+                prevLevel.portal = new Portal(this, false, false);
                 engine.actors.Add(prevLevel);
             }
             else if (loaded)
@@ -220,22 +238,22 @@ namespace roguelike
                 engine.player.x = gameState.levellist[gameState.curLevel].startx - 1;
                 engine.player.y = gameState.levellist[gameState.curLevel].starty;
 
-                Actor nextLevel = new Actor(gameState.levellist[gameState.curLevel].endx, gameState.levellist[gameState.curLevel].endy, '>', "stairs", TCODColor.sea);
-                nextLevel.portal = new Portal(this, true);
-                engine.actors.Add(nextLevel);
-            }
-            else if (loaded && gameState.curLevel != 0)
-            {
-                engine.player.x = gameState.levellist[gameState.curLevel].startx - 1;
-                engine.player.y = gameState.levellist[gameState.curLevel].starty;
-
                 Actor prevLevel = new Actor(gameState.levellist[gameState.curLevel].startx, gameState.levellist[gameState.curLevel].starty, '>', "stairs", TCODColor.sea);
-                prevLevel.portal = new Portal(this, false);
+                prevLevel.portal = new Portal(this, false, false);
                 engine.actors.Add(prevLevel);
 
                 Actor nextLevel = new Actor(gameState.levellist[gameState.curLevel].endx, gameState.levellist[gameState.curLevel].endy, '>', "stairs", TCODColor.sea);
-                nextLevel.portal = new Portal(this, true);
+                
                 engine.actors.Add(nextLevel);
+
+                if (gameState.curLevel == 4)
+                {
+                    nextLevel.portal = new Portal(this, false, true);
+                }
+                else
+                {
+                    nextLevel.portal = new Portal(this, false, false);
+                }
             }
             else
             {
@@ -243,11 +261,11 @@ namespace roguelike
                 engine.player.y = gameState.levellist[gameState.curLevel].endy;
 
                 Actor nextLevel = new Actor(gameState.levellist[gameState.curLevel].endx, gameState.levellist[gameState.curLevel].endy, '>', "stairs", TCODColor.sea);
-                nextLevel.portal = new Portal(this, true);
+                nextLevel.portal = new Portal(this, true, false);
                 engine.actors.Add(nextLevel);
 
                 Actor prevLevel = new Actor(gameState.levellist[gameState.curLevel].startx, gameState.levellist[gameState.curLevel].starty, '>', "stairs", TCODColor.sea);
-                prevLevel.portal = new Portal(this, false);
+                prevLevel.portal = new Portal(this, false, false);
                 engine.actors.Add(prevLevel);
             }
 
@@ -268,7 +286,6 @@ namespace roguelike
                 }
             }
 
-            /// UGLY ugly function used for reloading actors and their positions
             foreach (ActorStore actordata in gameState.levellist[gameState.curLevel].actors)
             {
                 if(actordata.name == "thug" || actordata.name == "gangster")
@@ -329,6 +346,14 @@ namespace roguelike
 
                     engine.actors.Add(fire);
                 }
+                else if (actordata.name == "girl")
+                {
+                    Actor girl = new Actor(actordata.x, actordata.y, (char)TCODSpecialCharacter.Female, "girl", TCODColor.red);
+                    girl.pick = new Girl(engine);
+                    girl.blocks = false;
+
+                    engine.actors.Add(girl);
+                }
             }
 
             return;
@@ -379,6 +404,14 @@ namespace roguelike
                 confuse.pick = new Confuser(10, 10, engine);
 
                 engine.actors.Add(confuse);
+            }
+            else if (prop == 'G')
+            {
+                Actor gren = new Actor(x, y, '#', "grenade", TCODColor.red);
+                gren.blocks = false;
+                gren.pick = new grenade(5, 10, engine);
+
+                engine.actors.Add(gren);
             }
             else if (Char.IsNumber(prop) || prop == '(' || prop == ')')
             {
@@ -435,8 +468,10 @@ namespace roguelike
             TCODColor darkGround;
             TCODColor lightWall;
             TCODColor lightGround;
-            TCODColor grass = TCODColor.desaturatedGreen;
-            TCODColor darkgrass = TCODColor.darkGreen;
+            TCODColor grass = new TCODColor(129, 145, 84);
+            TCODColor darkgrass = new TCODColor(85, 96, 56);
+            TCODColor grasswall = new TCODColor(47, 53, 31);
+            TCODColor darkgrasswall = new TCODColor(49, 56, 32);
 
             if (engine.gameState.curLevel == 0 || engine.gameState.curLevel == 1 || engine.gameState.curLevel == 4)
             {
@@ -459,11 +494,11 @@ namespace roguelike
                     {
                         if (isInView(x, y))
                         {
-                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? lightWall : grass);
+                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? grasswall : grass);
                         }
                         else if (isExplored(x, y))
                         {
-                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? darkWall : darkgrass);
+                            TCODConsole.root.setCharBackground(x, y, isWall(x, y) ? darkgrasswall : darkgrass);
                         }
                     }
                     else
@@ -590,6 +625,11 @@ namespace roguelike
                     tiles[x + y * width].canWalk = true;
                 }
             }
+        }
+        public void endgame()
+        {
+            engine.wingame();
+            return;
         }
     }
 }

@@ -12,16 +12,23 @@ namespace roguelike
 
         Map map;
         bool forward;
+        bool last;
 
-        public Portal(Map map, bool forward)
+        public Portal(Map map, bool forward, bool last)
         {
             this.map = map;
             this.forward = forward;
+            this.last = last;
         }
 
         public override bool use(Actor actor, Actor owner)
         {
-            map.changeLevel(forward);
+            if (!last)
+            {
+                map.changeLevel(forward);
+                return true;
+            }
+            map.endgame();
             return true;
         }
     }
@@ -29,17 +36,20 @@ namespace roguelike
     public class Girl : Pickable
     {
         Engine engine;
+        Actor player;
+        public bool follow = false;
 
         public Girl(Engine engine)
         {
             this.engine = engine;
+            this.player = engine.player;
         }
 
         public override bool use(Actor owner, Actor wearer)
         {
-            // win games
-            engine.gStatus = Engine.Status.WIN;
-            return true;
+            //engine.gStatus = Engine.Status.WIN;
+            follow = true;
+            return false;
         }
     }
 
@@ -607,6 +617,8 @@ namespace roguelike
         public TCODColor col;
         public bool blocks;
         public Attacker attacker;
+        public int playerOldX;
+        public int playerOldy;
         public Destructible destruct;
         public AI ai;
         public Pickable pick;
@@ -643,9 +655,42 @@ namespace roguelike
             TCODConsole.root.setCharForeground(x, y, col);
         }
 
+        public void follow(Engine engine, int x, int y)
+        {
+            if (this.x == engine.player.x && this.y == engine.player.y)
+            {
+                return;
+            }
+            if (engine.player.x - x != 0)
+            {
+                this.x = x;
+                this.y = engine.player.y;
+            }
+            if (engine.player.y != y)
+            {
+                this.y = y;
+                this.x = engine.player.x;
+            }
+
+        }
+
         public void update(Engine engine)
         {
             if (ai != null) ai.update(this, engine);
+            if (pick != null)
+            {
+                if (pick is Girl)
+                {
+                    Girl girl = pick as Girl;
+                    if (girl.follow == true)
+                    {
+                        follow(engine, playerOldX, playerOldy);
+                        playerOldy = engine.player.y;
+                        playerOldX = engine.player.x;
+                    }
+                }
+            }
+
         }
 
         public void update(TCODKey key, Engine engine)

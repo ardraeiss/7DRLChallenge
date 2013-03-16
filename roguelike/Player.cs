@@ -172,6 +172,10 @@ namespace roguelike
                         owner.attacker.attack(owner, actor, engine);
                         return false;
                     }
+                    if (actor.name == "girl" && actor.x == tarx && actor.y == tary)
+                    {
+                        actor.pick.use(actor, actor);
+                    }
                     else if (((actor.destruct != null && actor.destruct.isDead()) || actor.pick != null && actor.name != "door" && actor.name != "trigger") && actor.x == tarx && actor.y == tary)
                     {
                         engine.gui.message(TCODColor.lightGrey, "{0}...", actor.name);
@@ -203,6 +207,7 @@ namespace roguelike
                 owner.x = tarx;
                 owner.y = tary;
                 return true;
+
             }
 
             changingLevel = false;

@@ -1,0 +1,12 @@
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\libtcod-net-unmanaged.dll
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\libtcod-VS.dll
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\SDL.dll
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\terminal.png
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\zlib1.dll
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\roguelike.exe
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\roguelike.pdb
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\bin\Release\libtcod-net.dll
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Release\roguelike.Properties.Resources.resources
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Release\roguelike.csproj.GenerateResource.Cache
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Release\roguelike.exe
+C:\Users\Justin\documents\visual studio 2010\Projects\roguelike\roguelike\obj\x86\Release\roguelike.pdb
